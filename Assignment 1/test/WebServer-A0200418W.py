@@ -15,6 +15,8 @@ def decodeHeader(httpHeader):
     substrings = httpHeader.split('/', 2)
     httpMethod = substrings[0].upper()
     httpPath = substrings[1]
+    print(httpMethod)
+    print(httpPath)
 
     if (httpMethod == 'GET'):
         key = substrings[2][:-2]
@@ -24,7 +26,9 @@ def decodeHeader(httpHeader):
         return deleteHandler([httpPath, key])
     elif (httpMethod == 'POST'):
         keyAndOtherInfo = substrings[2].split(' ')
+        print(keyAndOtherInfo)
         key = keyAndOtherInfo[0]
+        print(key)
         indexOfCL = keyAndOtherInfo.upper().find('CONTENT-LENGTH')
         # No content header found
         if (indexOfCL == -1):
