@@ -10,19 +10,74 @@ keyValueStore = {}
 counterStore = {}
 
 
-def getHandler(httpPath, key):
-    print("GET got called")
-    return 'magicGet'
+def getHandler(httpPath, keyValueStore, counterStore, key):
+    print('GET got called')
+    if (httpPath == 'key'):
+        if(key not in keyValueStore):
+            return '404 NotFound  '.encode()
+        elif(key in keyValueStore and key in counterStore):
+            counterStore[key] -= 1
+            keyValue = keyValueStore[key]
+            if(counterStore[key] == 0):
+                del keyValueStore[key]
+                del counterStore[key]
+            return ('200 OK Content-Length ' + str(len(keyValue)) + '  ').encode() + keyValue
+        elif(key in keyValueStore):
+            return ('200 OK Content-Length ' + str(len(keyValueStore[key])) + '  ').encode() + keyValueStore[key]
+    elif (httpPath == 'counter'):
+        if(key not in keyValueStore):
+            return '404 NotFound  '.encode()
+        elif(key in counterStore and key in keyValueStore):
+            return ('200 OK Content-Length ' + str(len(str(counterStore[key]))) + '  ' + str(counterStore[key])).encode()
+        elif(key in keyValueStore):
+            return '200 OK Content-Length 8  Infinity'.encode()
+    return 'getHandler error'
 
 
-def deleteHandler(httpPath, key):
-    print("DELETE got called")
-    return 'magicDelete'
+def deleteHandler(httpPath, keyValueStore, counterStore, key):
+    print('DELETE got called')
+    if (httpPath == 'key'):
+        if(key not in keyValueStore):
+            return '404 NotFound  '.encode()
+        elif(key in keyValueStore and key in counterStore):
+            if(counterStore[key] > 0):
+                return '405 MethodNotAllowed  '.encode()
+            else:
+                del keyValueStore[key]
+                del counterStore[key]
+                return '200 OK  '.encode()
+        elif(key in keyValueStore):
+            keyValue = keyValueStore[key]
+            del keyValueStore[key]
+            return ('200 OK Content-Length ' + str(len(keyValue)) + '  ').encode() + keyValue
+    if (httpPath == 'counter'):
+        if(key not in counterStore):
+            return '404 NotFound  '.encode()
+        else:
+            countValue = counterStore[key]
+            del counterStore[key]
+            return ('200 OK Content-Length ' + str(len(str(countValue))) + '  ' + str(countValue)).encode()
+    return 'deleteHandler error'
 
 
-def postHandler(httpPath, key):
-    print("posthanlder got called")
-    return 'magicPost'
+def postHandler(httpPath, keyValueStore, counterStore, key, data):
+    print("posthandler got called")
+    if(httpPath == 'key'):
+        if(key in counterStore and counterStore[key] > 0):
+            return '405 MethodNotAllowed  '.encode()
+        else:
+            keyValueStore[key] = data
+            return '200 OK  '.encode()
+    if(httpPath == 'counter'):
+        if(key not in keyValueStore):
+            return '405 MethodNotAllowed  '.encode()
+        elif(key in counterStore):
+            counterStore[key] += int(data)
+            return '200 OK  '.encode()
+        elif(key not in counterStore):
+            counterStore[key] = int(data)
+            return '200 OK  '.encode()
+    return 'postHandler error'
 
 
 def decodeHeader(httpHeader):
@@ -33,29 +88,26 @@ def decodeHeader(httpHeader):
     print(httpMethod)
     print(httpPath)
 
-    if (httpMethod == 'GET'):
+    if (httpMethod == 'GET '):
         key = substrings[2][:-2]
         return getHandler([httpPath, key])
-    elif (httpMethod == 'DELETE'):
+    elif (httpMethod == 'DELETE '):
         key = substrings[2][:-2]
         return deleteHandler([httpPath, key])
-    elif (httpMethod == 'POST'):
-        print(substrings[2] + " THIS IS SUBSTRING2")
+    elif (httpMethod == 'POST '):
         keyAndOtherInfo = substrings[2].split(' ')
         key = keyAndOtherInfo[0]
-        print(key)
         for i in range(len(keyAndOtherInfo)):
             headerInfoName = keyAndOtherInfo[i].upper()
             if (headerInfoName == 'CONTENT-LENGTH'):
                 clength = int(keyAndOtherInfo[i+1])
         # get the data
-        data = ' '.encode()
+        data = ''.encode()
         while(clength != 0):
             data += conn.recv(clength)
             clength -= 1
-        print(clength)
-        print(data.decode())
-        return postHandler(httpPath, key)
+        return postHandler(httpPath, keyValueStore, counterStore, key, data)
+    return 'decodeHeader error'
 
 
 while True:
@@ -74,3 +126,4 @@ while True:
             break
 
         reply = decodeHeader(header)
+        conn.send(reply)
