@@ -10,6 +10,18 @@ keyValueStore = {}
 counterStore = {}
 
 
+def getHandler(httpPath, key):
+    return 'magicGet'
+
+
+def deleteHandler(httpPath, key):
+    return 'magicDelete'
+
+
+def postHandler(httpPath, key):
+    return 'magicPost'
+
+
 def decodeHeader(httpHeader):
     print(httpHeader)
     substrings = httpHeader.split('/', 2)
@@ -29,29 +41,18 @@ def decodeHeader(httpHeader):
         print(keyAndOtherInfo)
         key = keyAndOtherInfo[0]
         print(key)
-        indexOfCL = keyAndOtherInfo.upper().find('CONTENT-LENGTH')
-        # No content header found
-        if (indexOfCL == -1):
-            print("no content length found")
-        else:  # Check if the index is correct
-            print(indexOfCL + 14)
-            contentLength = keyAndOtherInfo[indexOfCL + 14]
-            content = keyAndOtherInfo[contentLength + 3:]
-            print(contentLength)
-            print(content)
-            return postHandler(httpPath, key, content)
-
-
-def getHandler(httpPath, key):
-    return 'magicGet'
-
-
-def deleteHandler(httpPath, key):
-    return 'magicDelete'
-
-
-def postHandler(httpPath, key):
-    return 'magicPost'
+        for i in range(len(keyAndOtherInfo)):
+            headerInfoName = keyAndOtherInfo[i].upper()
+            if (headerInfoName == 'CONTENT-LENGTH'):
+                clength = int(keyAndOtherInfo[i+1])
+        # get the data
+        data = ' '.encode()
+        while(clength != 0):
+            data += conn.recv(clength)
+            clength -= 1
+        print(clength)
+        print(data.decode())
+        return postHandler(httpPath, key)
 
 
 while True:
