@@ -26,10 +26,10 @@ def decodeHeader(httpHeader):
         keyAndOtherInfo = substrings[2].split(' ')
         key = keyAndOtherInfo[0]
         indexOfCL = keyAndOtherInfo.upper().find('CONTENT-LENGTH')
-
+        # No content header found
         if (indexOfCL == -1):
             print("no content length found")
-        else:
+        else:  # Check if the index is correct
             print(indexOfCL + 15)
             contentLength = keyAndOtherInfo[indexOfCL + 15]
             content = keyAndOtherInfo[contentLength + 3:]
@@ -51,8 +51,8 @@ def postHandler(httpPath, key):
 
 
 while True:
-    conn, addr = serverSocket.accept()
     print('Server is ready to receive')
+    conn, addr = serverSocket.accept()
 
     while True:
         header = ''
@@ -65,4 +65,4 @@ while True:
             conn.close()
             break
 
-    reply = decodeHeader(header)
+        reply = decodeHeader(header)
