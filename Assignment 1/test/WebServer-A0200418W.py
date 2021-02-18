@@ -1,6 +1,6 @@
 import sys
 from socket import *
-#import time
+# import time
 
 serverPort = int(sys.argv[1])
 serverSocket = socket(AF_INET, SOCK_STREAM)
@@ -30,7 +30,7 @@ def decodeHeader(httpHeader, conn):
         # find content length in header details
         for i in range(len(keyAndOtherInfo)):
             headerInfoName = keyAndOtherInfo[i].upper()
-            if (headerInfoName == 'CONTENT-LENGTH'):
+            if (headerInfoName == 'CONTENT-LENGTH' and keyAndOtherInfo[i+1].isdecimal()):
                 clength = int(keyAndOtherInfo[i+1])
         # get the data
         data = ''.encode()
@@ -137,9 +137,9 @@ while True:
             conn.close()
             break
 
-        #start = time.time()
+        # start = time.time()
         decodedHeader = decodeHeader(header, conn)
         reply = pathSplitter(decodedHeader)
-        #end = time.time()
-        #print(end - start)
+        # end = time.time()
+        # print(end - start)
         conn.send(reply)
