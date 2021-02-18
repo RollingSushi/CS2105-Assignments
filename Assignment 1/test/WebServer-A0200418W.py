@@ -11,14 +11,17 @@ counterStore = {}
 
 
 def getHandler(httpPath, key):
+    print("GET got called")
     return 'magicGet'
 
 
 def deleteHandler(httpPath, key):
+    print("DELETE got called")
     return 'magicDelete'
 
 
 def postHandler(httpPath, key):
+    print("posthanlder got called")
     return 'magicPost'
 
 
@@ -37,8 +40,8 @@ def decodeHeader(httpHeader):
         key = substrings[2][:-2]
         return deleteHandler([httpPath, key])
     elif (httpMethod == 'POST'):
+        print(substrings[2] + " THIS IS SUBSTRING2")
         keyAndOtherInfo = substrings[2].split(' ')
-        print(keyAndOtherInfo)
         key = keyAndOtherInfo[0]
         print(key)
         for i in range(len(keyAndOtherInfo)):
