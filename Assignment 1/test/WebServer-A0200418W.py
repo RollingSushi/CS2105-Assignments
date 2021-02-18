@@ -1,6 +1,6 @@
 import sys
 from socket import *
-import time
+#import time
 
 serverPort = int(sys.argv[1])
 serverSocket = socket(AF_INET, SOCK_STREAM)
@@ -10,30 +10,32 @@ serverSocket.listen(1)
 keyValueStore = {}
 counterStore = {}
 
+# Returns an array of the header split into it's components
+
 
 def decodeHeader(httpHeader, conn):
     print(httpHeader)
     substrings = httpHeader.split('/', 2)
     httpMethod = substrings[0].upper()
     httpPath = substrings[1]
-    print(httpMethod)
-    print(httpPath)
+    # print(httpMethod)
+    # print(httpPath)
 
-    if (httpMethod == 'GET ' or httpMethod == 'DELETE'):
+    if (httpMethod == 'GET ' or httpMethod == 'DELETE '):
         key = substrings[2][:-2]
         return [httpMethod, httpPath, key, 'NULL']
     elif (httpMethod == 'POST '):
         keyAndOtherInfo = substrings[2].split(' ')
         key = keyAndOtherInfo[0]
+        # find content length in header details
         for i in range(len(keyAndOtherInfo)):
             headerInfoName = keyAndOtherInfo[i].upper()
             if (headerInfoName == 'CONTENT-LENGTH'):
                 clength = int(keyAndOtherInfo[i+1])
         # get the data
         data = ''.encode()
-        while(clength != 0):
-            data += conn.recv(clength)
-            clength -= 1
+        while(len(data) != clength):
+            data += conn.recv(clength - len(data))
         return [httpMethod, httpPath, key, data]
 
 
@@ -122,7 +124,6 @@ def pathSplitter(decodedHeader):
 
 
 while True:
-    print('Server is ready to receive')
     conn, addr = serverSocket.accept()
 
     while True:
@@ -136,9 +137,9 @@ while True:
             conn.close()
             break
 
-        start = time.time()
+        #start = time.time()
         decodedHeader = decodeHeader(header, conn)
         reply = pathSplitter(decodedHeader)
-        end = time.time()
-        print(end - start)
+        #end = time.time()
+        #print(end - start)
         conn.send(reply)
