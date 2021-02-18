@@ -34,8 +34,8 @@ def decodeHeader(httpHeader):
         if (indexOfCL == -1):
             print("no content length found")
         else:  # Check if the index is correct
-            print(indexOfCL + 15)
-            contentLength = keyAndOtherInfo[indexOfCL + 15]
+            print(indexOfCL + 14)
+            contentLength = keyAndOtherInfo[indexOfCL + 14]
             content = keyAndOtherInfo[contentLength + 3:]
             print(contentLength)
             print(content)
